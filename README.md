@@ -1,1 +1,1 @@
-# DistributedLogAnalysis
+DistributedLogAnalysis is a dynamic web project focused on analyzing and displaying log data from distributed systems. This repository hosts the frontend logic essential for the seamless operation of DistributedLogAnalysis. It includes JavaScript implementations for interfacing with the backend to fetch log data, rendering this data for user viewing, and managing event listeners to ensure interactive and responsive user controls. Explore this project to leverage the power of distributed log analysis with an intuitive and efficient frontend.
