@@ -8,7 +8,7 @@ const fetchLogData = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching log data:', error);
-    return [];
+    throw new Error('Failed to fetch log data');
   }
 };
 
@@ -42,12 +42,14 @@ const handleFilterSubmit = (event) => {
     if (!level) {
       throw new Error('Log level value is missing');
     }
-    fetchLogData().then(logs => {
-      const filteredLogs = logs.filter(log => log.level === level);
-      displayLogData(filteredLogs);
-    }).catch((error) => {
-      console.error('Error applying filter on log data:', error);
-    });
+    fetchLogData()
+      .then(logs => {
+        const filteredLogs = logs.filter(log => log.level === level);
+        displayLogData(filteredLogs);
+      })
+      .catch((error) => {
+        console.error('Error applying filter on log data:', error);
+      });
   } catch (error) {
     console.error('Error with the filter form submission:', error);
   }
