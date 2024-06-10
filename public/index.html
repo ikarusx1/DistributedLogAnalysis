@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributed Log Analysis Interface</title>
+    
+</head>
+<body>
+    
+    
+    <div id="logData">
+        
+    </div>
+    
+    <div id="userControls">
+        
+    </div>
+    
+    <script>
+        const fetchLogData = async () => {
+            const logDataURL = process.env.LOG_DATA_URL || "defaultEndpointURL";
+            try {
+                const response = await fetch(logDataURL);
+                const data = await response.json();
+                
+            } catch (error) {
+                console.error("Failed to fetch log data:", error);
+            }
+        };
+
+        
+    </script>
+</body>
+</html>
