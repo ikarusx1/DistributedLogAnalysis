@@ -4,32 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Distributed Log Analysis Interface</title>
-    
 </head>
 <body>
     
-    
     <div id="logData">
-        
+        <!-- Log data will be displayed here -->
     </div>
     
     <div id="userControls">
-        
+        <!-- Added a button to fetch log data -->
+        <button id="fetchLogDataBtn">Fetch Log Data</button>
     </div>
     
     <script>
+        const logDataDiv = document.getElementById('logData');
+
+        const displayData = (data) => {
+            logDataDiv.innerHTML = '';
+            logDataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        };
+
         const fetchLogData = async () => {
             const logDataURL = process.env.LOG_DATA_URL || "defaultEndpointURL";
             try {
                 const response = await fetch(logDataURL);
                 const data = await response.json();
-                
+                displayData(data);
             } catch (error) {
                 console.error("Failed to fetch log data:", error);
+                logDataDiv.innerHTML = `<p>Error fetching data. See console for details.</p>`;
             }
         };
 
-        
+        document.getElementById('fetchLogDataBtn').addEventListener('click', fetchLogData);
     </script>
 </body>
 </html>
