@@ -7,60 +7,60 @@ from pymongo import MongoClient
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", 27017)
 DB_NAME = os.getenv("DB_NAME", "log_db")
-DB_COLLECTION_NAME = os.getenv("DB_COLLECTION_NAME", "logs")
+DB_COLLECTION = os.getenv("DB_COLLECTION_NAME", "logs")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-client = MongoClient(DB_HOST, int(DB_PORT))
-db = client[DB_NAME]
-collection = db[DB_COLLECTION_NAME]
+mongodb_client = MongoClient(DB_HOST, int(DB_PORT))
+log_db = mongodb_client[DB_NAME]
+log_collection = log_body[DB_COLLECTION]
 
-def connect_to_db():
+def establish_db_connection():
     try:
-        client.server_info()
+        mongodb_client.server_info()
         logging.info("Connected to MongoDB.")
-    except Exception as e:
-        logging.error(f"Could not connect to MongoDB: {e}")
+    except Exception as connection_error:
+        logging.error(f"Could not connect to MongoDB: {connection_error}")
         raise
 
-def insert_log(log):
+def store_log_record(log_record):
     try:
-        collection.insert_one(log)
-        logging.info("Log inserted into database.")
-    except Exception as e:
-        logging.error(f"Failed to insert log into database: {e}")
+        log_collection.insert_one(log_record)
+        logging.info("Log record saved into database.")
+    except Exception as insertion_error:
+        logging.error(f"Failed to store log record into database: {insertion_error}")
 
-def process_log_file(file_path):
+def handle_log_file(file_path):
     try:
-        with open(file_path, 'r') as file:
-            for line in file:
+        with open(file_path, 'r') as log_file:
+            for line in log_file:
                 log_data = json.loads(line)
-                insert_log(log_data)
-    except Exception as e:
-        logging.error(f"Error processing log file {file_path}: {e}")
+                store_log_record(log_data)
+    except Exception as file_processing_error:
+        logging.error(f"Error handling log file {file_path}: {file_processing_error}")
 
-def filter_logs(query):
+def retrieve_logs_based_on_filter(search_query):
     try:
-        return list(collection.find(query))
-    except Exception as e:
-        logging.error(f"Failed to retrieve filtered logs: {e}")
+        return list(log_collection.find(search_query))
+    except Exception as retrieval_error:
+        logging.error(f"Failed to fetch logs based on filter: {retrieval_data}")
         return []
 
-def aggregate_logs(pipeline):
+def compile_logs_using_aggregation(pipeline):
     try:
-        return list(collection.aggregate(pipeline))
-    except Exception as e:
-        logging.error(f"Failed to aggregate logs: {e}")
+        return list(log_collection.aggregate(pipeline))
+    except Exception as aggregation_error:
+        logging.error(f"Failed to compile logs using aggregation: {aggregation_error}")
         return []
 
 if __name__ == "__main__":
-    connect_to_db()
-    process_log_file("path/to/log/file.log")
-    filtered_logs = filter_logs({"level": "ERROR"})
-    aggregation_pipeline = [
+    establish_db_connection()
+    handle_log_file("path/to/log/file.log")
+    error_logs_filter = retrieve_logs_based_on_filter({"level": "ERROR"})
+    error_logs_aggregation_pipeline = [
         {"$match": {"level": "ERROR"}},
-        {"$group": {"_id": "$source", "count": {"$sum": 1}}}
+        {"$group": {"_id": "$source", "total_count": {"$sum": 1}}}
     ]
-    aggregated_logs = aggregate_logs(aggregation_pipeline)
-    print(filtered_logs)
-    print(aggregated_logs)
+    compiled_error_logs = compile_logs_using_aggregation(error_logs_aggregation_pipeline)
+    print(error_logs_filter)
+    print(compiled_error_logs)
