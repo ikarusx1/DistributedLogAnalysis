@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from psycopg2.extras import execute_batch
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,75 +10,76 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT')
 
-CREATE_LOG_TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS logs (
+SQL_CREATE_LOGS_TABLE = """
+CREATE TABLE IF NOT EXISTS log_entries (
     id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP NOT NULL,
-    log_level VARCHAR(50) NOT NULL,
-    message TEXT NOT NULL
+    entry_timestamp TIMESTAMP NOT NULL,
+    severity_level VARCHAR(50) NOT NAME,
+    entry_message TEXT NOT NULL
 )
 """
 
-def get_db_connection():
-    conn = None
+def establish_database_connection():
+    connection = None
     try:
-        conn = psycopg2.connect(
+        connection = psycopg2.connect(
             dbname=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
             host=DB_HOST,
             port=DB_PORT
         )
-    except Exception as e:
-        print(f"Cannot connect to database: {e}")
-    return conn
+    except Exception as error:
+        print(f"Cannot connect to the database: {error}")
+    return connection
 
-def create_schema():
-    conn = get_db_connection()
-    if conn:
+def create_logs_table():
+    connection = establish_database_connection()
+    if connection:
         try:
-            with conn.cursor() as cursor:
-                cursor.execute(CREATE_LOG_TABLE_SQL)
-            conn.commit()
-        except Exception as e:
-            print(f"Failed to create schema: {e}")
+            with connection.cursor() as cursor:
+                cursor.execute(SQL_CREATE_LOGS_TABLE)
+            connection.commit()
+        except Exception as error:
+            print(f"Failed to create logs table: {error}")
         finally:
-            conn.close()
+            connection.close()
     else:
-        print("Connection not established. Schema not created.")
+        print("Connection not established. Logs table not created.")
 
-def insert_log(timestamp, log_level, message):
-    conn = get_db_connection()
-    if conn:
+def insert_log_entry(entry_timestamp, severity_level, entry_message):
+    connection = establish_database_connection()
+    if connection:
         try:
-            with conn.cursor() as cursor:
-                cursor.execute('INSERT INTO logs (timestamp, log_level, message) VALUES (%s, %s, %s)',
-                               (timestamp, log_level, message))
-            conn.commit()
-        except Exception as e:
-            print(f"Failed to insert log: {e}")
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO log_entries (entry_timestamp, severity_level, entry_message) VALUES (%s, %s, %s)',
+                    (entry_timestamp, severity_level, entry_batch))
+            connection.commit()
+        except Exception as error:
+            print(f"Failed to insert log entry: {error}")
         finally:
-            conn.close()
+            connection.close()
     else:
-        print("Connection not established. Log not inserted.")
+        print("Connection not established. Log entry not inserted.")
 
-def fetch_logs():
-    conn = get_db_connection()
-    logs = []
-    if conn:
+def retrieve_log_entries():
+    connection = establish_database_connection()
+    log_entries = []
+    if connection:
         try:
-            with conn.cursor() as cursor:
-                cursor.execute('SELECT id, timestamp, log_level, message FROM logs ORDER BY timestamp DESC')
-                logs = cursor.fetchall()
-        except Exception as e:
-            print(f"Failed to fetch logs: {e}")
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT id, entry_timestamp, severity_level, entry_message FROM log_entries ORDER BY entry_timestamp DESC')
+                log_entries = cursor.fetchall()
+        except Exception as error:
+            print(f"Failed to fetch log entries: {error}")
         finally:
-            conn.close()
+            connection.close()
     else:
-        print("Connection not established. Logs not fetched.")
-    return logs
+        print("Connection not established. Log entries not fetched.")
+    return log_entries
 
 if __name__ == "__main__":
-    create_schema()
-    insert_log('2023-01-01 12:00:00', 'INFO', 'This is a test log message.')
-    print(fetch_logs())
+    create_logs_table()
+    insert_log_entry('2023-01-01 12:00:00', 'INFO', 'This is a test log message.')
+    print(retrieve_log_entries())
