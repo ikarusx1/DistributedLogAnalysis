@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"yourproject/loganalysis/logaggregator"
+	"yourproject/loganalysis/logcollector"
 )
 
 func main() {
@@ -14,13 +14,13 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	aggregator := logaggregator.NewLogAggregator(
-		os.Getenv("LOG_SOURCE_DIR"),
-		os.Getenv("AGGREGATED_LOG_DIR"),
+	collector := logcollector.NewCollector(
+		os.Getenv("SOURCE_DIRECTORY"),
+		os.Getenv("DESTINATION_DIRECTORY"),
 	)
 
-	err = aggregator.AggregateLogs()
+	err = collector.CollectAndAggregateLogs()
 	if err != nil {
-		log.Fatalf("Failed to aggregate logs: %v", err)
+		log.Fatalf("Failed to collect and aggregate logs: %v", err)
 	}
 }
