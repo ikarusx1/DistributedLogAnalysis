@@ -22,10 +22,10 @@ type AggregatedData struct {
 }
 
 func aggregateLogs(logEntries []LogEntry) map[string]*AggregatedData {
-	aggregatedData := make(map[string]*AggregatedData)
+	aggregatedData := make(map[string]*AggregatedFileData)
 
 	for _, entry := range logEntries {
-		if _, ok := aggregatedData[entry.Level]; !ok {
+		if _, exists := aggregatedData[entry.Level]; !exists {
 			aggregatedData[entry.Level] = &AggregatedData{Level: entry.Level, Count: 0, Message: ""}
 		}
 		aggregatedData[entry.Level].Count++
@@ -67,8 +67,8 @@ func simulateDistributedAggregation(files []string) {
 				return
 			}
 
-			aggregated := aggregateLogs(logEntries)
-			for level, data := range aggregated {
+			aggregatedData := aggregateLogs(logEntries)
+			for level, data := range aggregatedData {
 				fmt.Printf("File: %s, Level: %s, Count: %d\n", filePath, level, data.Count)
 			}
 		}(file)
